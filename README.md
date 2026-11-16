@@ -3,6 +3,8 @@
 A serverless web application built on AWS that allows users to submit repair/support tickets via a web form, store ticket records in a NoSQL database, and trigger instant email notifications.
 
 ## System Architecture
+<img width="1376" height="768" alt="Gemini_Generated_Image_ahwp9lahwp9lahwp" src="https://github.com/user-attachments/assets/2292e48e-f265-4c93-8ea3-e2dede135593" />
+
 
 **Workflow:** `User` ➔ `Amazon S3` ➔ `API Gateway` ➔ `AWS Lambda` ➔ `DynamoDB` & `Amazon SNS`
 
