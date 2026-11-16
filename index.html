@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบแจ้งซ่อมออนไลน์ (Helpdesk)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { text-align: center; color: #232f3e; margin-bottom: 20px; }
+        label { font-weight: bold; display: block; margin-top: 15px; color: #333; }
+        input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 12px; background-color: #ff9900; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        button:hover { background-color: #e68a00; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 5px; display: none; text-align: center; font-weight: bold; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🛠️ ฟอร์มแจ้งซ่อม / ร้องเรียนปัญหา</h2>
+    <form id="ticketForm">
+        <label>ชื่อผู้แจ้ง:</label>
+        <input type="text" id="name" placeholder="ระบุชื่อ-นามสกุล" required>
+        
+        <label>ห้อง / สถานที่:</label>
+        <input type="text" id="room" placeholder="เช่น ห้อง 402 ชั้น 4" required>
+        
+        <label>รายละเอียดปัญหา:</label>
+        <textarea id="issue" rows="4" placeholder="อธิบายอาการเสียที่พบ..." required></textarea>
+        
+        <button type="submit" id="submitBtn">ส่งแจ้งซ่อม</button>
+    </form>
+    <div id="resultBox" class="result"></div>
+</div>
+
+<script>
+    const API_URL = '[กรอก-INVOKE-URL-ของคุณตรงนี้]/tickets';
+
+    document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const resultBox = document.getElementById('resultBox');
+        
+        btn.disabled = true;
+        btn.innerText = 'กำลังส่งข้อมูล...';
+        resultBox.style.display = 'none';
+
+        const payload = {
+            name: document.getElementById('name').value,
+            room: document.getElementById('room').value,
+            issue: document.getElementById('issue').value
+        };
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                resultBox.className = 'result success';
+                resultBox.innerHTML = `✅ บันทึกข้อมูลสำเร็จ!<br>รหัสอ้างอิงของคุณคือ: <u>${data.ticket_id}</u>`;
+                document.getElementById('ticketForm').reset();
+            } else {
+                throw new Error(data.error || 'เกิดข้อผิดพลาดในการบันทึก');
+            }
+        } catch (err) {
+            resultBox.className = 'result error';
+            resultBox.innerHTML = `❌ เกิดข้อผิดพลาดจากระบบ Backend กรุณาลองใหม่อีกครั้ง<br><small>(${err.message})</small>`;
+        } finally {
+            resultBox.style.display = 'block';
+            btn.disabled = false;
+            btn.innerText = 'ส่งแจ้งซ่อม';
+        }
+    });
+</script>
+
+</body>
+</html>
